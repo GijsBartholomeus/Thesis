@@ -12,10 +12,12 @@ import random
 from math import sqrt
 import matplotlib.pylab as plt
 import time
+import pickle
+import os
 
 
 Symmetric = False
-n = 50
+n = 200
 mean = 0
 gamma = 0.2
 std = gamma/np.sqrt(n)  
@@ -98,7 +100,7 @@ else:
     plt.title('Eigenvalue spectrum for matrix A')
     plt.show()
     
-    "Now for Stone"
+    "Now for Stone, we plot the eigenvalues of the matrix S = Diag(N)*A"
     plt.figure()
     S = np.dot(D,M)
     evals = LA.eigvals(S)        
@@ -123,7 +125,7 @@ else:
     #plt.savefig('wigner.pdf')            
     plt.show()
     
-    
+    "There is a theroretical bound for the eigenvalues of S, this function is plotted for real x"
     real = np.linspace(-1,0,1000)
     zero = np.linspace(0,0,1000)
     T=[]
@@ -137,11 +139,12 @@ else:
     plt.xlabel('Real')
     plt.axhline(y = 1/std**2, color = 'r', linestyle = 'dashed', label = "1/(gamma^2)")    
     plt.legend(bbox_to_anchor = (1.0, 1), loc = 'upper center')
+    plt.title('Function bounding the eigenvalue spectrum for matrix S = DA for real x')
     plt.show()
     
-    
-    real = np.linspace(-1.5,0.5, 1000)
-    im = np.linspace(-1,1,1000)
+    "Finally we plot the theoretical bound vs the eigenvalues"
+    real = np.linspace(-1.5,0.5, 6000)
+    im = np.linspace(-1,1,6000)
     delta=10
     lijst = []
     print("start")
@@ -152,11 +155,15 @@ else:
             if (bol):
                 lijst.append([real[i],im[k]])
         if i % 100 ==0:
-            print(i)    
+            print(i)
+        if i == 100:
+            mid = time.time()
+            med = mid -start
+            print('1/60th took ..', med,'s    ETA..', med/6,'minutes' )        
     lijst= np.array(lijst)
     end = time.time()
     elapsed_time = end-start
-    print("Looping took",elapsed_time,"seconds")
+    print("Looping took",elapsed_time/60,"minutes")
     
             
     plt.figure()
@@ -167,3 +174,14 @@ else:
     plt.legend(bbox_to_anchor = (1.0, 1), loc = 'upper center')
     plt.title('Eigenvalue spectrum for matrix S = DA')
     plt.show()
+
+    name = str(str(sym)+"_mu"+str(mean)+"_sigma"+str(round(std,2)))
+    path = "/Users/gijsbartholomeus/OneDrive - Universiteit Utrecht/Thesis/Pickles/"+name 
+    if not (os.path.exists(path)):
+        os.mkdir(path)       
+    file_name = path+"/"+str(name)+"_boundn400.pkl"
+    open_file = open(file_name, "wb")
+    pickle.dump(lijst, open_file)
+    open_file.close()
+    
+   

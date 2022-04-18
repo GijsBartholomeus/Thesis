@@ -12,28 +12,42 @@ import random
 import itertools
 import time
 import pickle
+import os
+
 
 
 
 
 random.seed(42) # because Farshid wanted 42
 
-
+Symmetric = True
 n = 20
-mean = 4/n
+mean = 40/n
 std = 0.8/np.sqrt(n)  
+Diagonalzero = True
+gamma = std*np.sqrt(n)/(1-mean)
+print('gamma =',gamma)
 """           
-We generate a matrix with random values sampled from a gaussian distribution with mean 4/n 
-and standard deeviation 0.8/sqrt(n)
+We generate a matrix with random values sampled from a gaussian distribution with mean default 4/n 
+and standard deeviation default 0.8/sqrt(n)
 """
+if Symmetric is True:
+    sym = 'sym'
+else:
+    sym= 'notsym'
 
-G = np.zeros((n,n))             # initialize a two-dimensional array
-for i in range(n):
-    for j in range(i,n):
-        G[i, j] = random.gauss(mean,std)    # random element 
-        G[j, i] = G[i, j]    
-for i in range(n):
-    G[i, i] = 0    # set diagonal to zero
+if Symmetric is True:
+    G = np.zeros((n,n))             # initialize a two-dimensional array
+    for i in range(n):
+        for j in range(i,n):
+            G[i, j] = random.gauss(mean,std)    # random element 
+            G[j, i] = G[i, j]    
+else:
+    G = np.random.normal(mean,std, size=(n,n))
+
+if Diagonalzero is True:
+    for i in range(n):
+        G[i, i] = 0           
 
 K = np.zeros(n)             # initialize a two-dimensional array
 for i in range(n):
@@ -77,23 +91,30 @@ for i in range(2**n):
 end = time.time()
 elapsed_time = end-start
 print("Looping took",elapsed_time,"seconds")
+name = str(str(sym)+"_mu"+str(mean)+"_sigma"+str(round(std,2)))
+path = "/Users/gijsbartholomeus/OneDrive - Universiteit Utrecht/Thesis/Pickles/"+name
 
-
-file_name = "Randommatrix.pkl"
+if not (os.path.exists(path)):
+    os.mkdir(path)
+file_name = path+"/"+str(name)+"_Randommatrix.pkl"
 open_file = open(file_name, "wb")
 pickle.dump(G, open_file)
 open_file.close()
 
-file_name = "Fixedpoints.pkl"
+file_name = path+"/"+str(name)+"_Fixedpoints.pkl"
 open_file = open(file_name, "wb")
 pickle.dump(Fixedpoints, open_file)
 open_file.close()
 
 
 
-"""We filter for feasible solutions (N_i \geq 0) in the next script Feasiblestablepoints.py"""
-
-
+# """We filter for feasible solutions (N_i \geq 0) in the next script Feasiblestablepoints.py"""
+# for i in range(2**n): 
+#     G = np.linalg.inv(G) 
+#     if i % 100000==0:
+#         print(i)
+#     if i % 1000000==0:        
+#         print(G)
 
 # lst = list(itertools.product([0, 1], repeat=20))
 # Fixedpoints =[]
